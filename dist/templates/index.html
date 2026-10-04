@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fashion AI Stylist - Chatbot Tư Vấn Thời Trang & Phối Đồ Thông Minh</title>
+  <meta name="description" content="AI Chatbot Tư Vấn Thời Trang: Tìm kiếm sản phẩm, đo size chuẩn vóc dáng người Việt, gợi ý phối đồ theo dịp và quy tắc màu sắc.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/chat.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo-icon">👔</div>
+        <div class="brand-text">
+          <h1>FASHION<span>.AI</span></h1>
+          <div class="brand-tagline">AI Fashion Stylist Pro</div>
+        </div>
+      </div>
+
+      <div class="sidebar-action-wrap">
+        <button class="btn-new-chat" onclick="startNewChat()">
+          <span style="font-size: 18px;">+</span> Cuộc Trò Chuyện Mới
+        </button>
+      </div>
+
+      <div class="sidebar-menu">
+        <div class="sidebar-section-title">Công Cụ Stylist Thông Minh</div>
+        <button class="sidebar-btn" onclick="openSizeAdvisorModal()">
+          <span>📏</span> Đo Size Vóc Dáng (BMI)
+        </button>
+        <button class="sidebar-btn" onclick="openOutfitAdvisorModal()">
+          <span>👗</span> Gợi Ý Phối Đồ Outfit
+        </button>
+        <button class="sidebar-btn" onclick="openColorAdvisorModal()">
+          <span>🎨</span> Tư Vấn Quy Tắc Phối Màu
+        </button>
+        <button class="sidebar-btn" onclick="toggleWardrobePanel('catalog')">
+          <span>🛍️</span> Xem Bộ Sưu Tập Cửa Hàng
+        </button>
+
+        <div class="sidebar-section-title">Hệ Thống & Cài Đặt</div>
+        <button class="sidebar-btn" onclick="openConfigKeyModal()">
+          <span>🔑</span> Cấu Hình OpenRouter Key
+        </button>
+        <button class="sidebar-btn" onclick="showSystemInfoModal()">
+          <span>ℹ️</span> Giới Thiệu Đồ Án
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="status-badge">
+          <div class="status-indicator"></div>
+          <span>AI Stylist Đang Sẵn Sàng</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 2. CENTER CHATBOT MAIN STAGE -->
+    <main class="chat-main-stage">
+      <!-- Main Top Header -->
+      <header class="main-top-bar">
+        <div class="top-bar-left">
+          <div class="top-bar-title">
+            <h2>
+              <span>👔</span> Fashion AI Stylist
+              <span class="ai-pill">RAG & LLM Engine</span>
+            </h2>
+          </div>
+        </div>
+
+        <div class="top-bar-actions">
+          <button class="top-action-btn gold-highlight" onclick="toggleWardrobePanel('recommended')">
+            <span>✨</span> Tủ Đồ Đề Xuất (<span id="recommended-count">0</span>)
+          </button>
+          <button class="top-action-btn" onclick="toggleCartDrawer()">
+            <span>🛒</span> Giỏ Hàng (<span id="cart-counter">0</span>)
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Messages Stream -->
+      <div class="chat-conversation-area" id="chat-messages">
+        <!-- Default Welcome Hero Screen -->
+        <div class="chat-welcome-hero" id="chat-welcome-hero">
+          <div class="welcome-avatar-wrap">👔</div>
+          <h2 class="welcome-headline">Hôm nay bạn muốn mặc phong cách gì?</h2>
+          <p class="welcome-sub">
+            Tôi là AI Stylist riêng của bạn. Tôi có thể tư vấn trang phục theo dịp, phân tích size chuẩn theo số đo chiều cao/cân nặng và gợi ý set đồ phối màu hoàn hảo.
+          </p>
+
+          <div class="welcome-cards-grid">
+            <div class="welcome-card-prompt" onclick="openChatWithPrompt('Tôi cần áo nam màu đen dưới 500k để đi dự tiệc')">
+              <div class="card-icon">👔</div>
+              <div class="card-title">Áo nam đen đi dự tiệc</div>
+              <div class="card-desc">Tìm áo sơ mi hoặc polo đen sang trọng dưới 500k</div>
+            </div>
+
+            <div class="welcome-card-prompt" onclick="openChatWithPrompt('Tôi cao 1m70, nặng 65kg nên mặc size gì?')">
+              <div class="card-icon">📏</div>
+              <div class="card-title">Tư vấn size theo vóc dáng</div>
+              <div class="card-desc">Phân tích thể trạng, chỉ số BMI và tư vấn form dáng vừa vặn</div>
+            </div>
+
+            <div class="welcome-card-prompt" onclick="openChatWithPrompt('Có váy nữ nào dưới 500 nghìn không?')">
+              <div class="card-icon">👗</div>
+              <div class="card-title">Váy đầm nữ thanh lịch</div>
+              <div class="card-desc">Đề xuất đầm dạ hội, váy xòe vintage hoặc chân váy công sở</div>
+            </div>
+
+            <div class="welcome-card-prompt" onclick="openChatWithPrompt('Màu đen có hợp với quần jean xanh không?')">
+              <div class="card-icon">🎨</div>
+              <div class="card-title">Tư vấn phối màu sắc</div>
+              <div class="card-desc">Quy tắc phối màu tương phản, bánh xe màu sắc và phong cách phối đồ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Dock at Bottom -->
+      <footer class="chat-dock-container">
+        <!-- Quick Prompts Chips -->
+        <div class="quick-prompts-bar" id="quick-prompts-bar">
+          <button class="quick-chip" onclick="openChatWithPrompt('Tôi cần áo nam màu đen dưới 500k để đi dự tiệc')">Áo nam đi tiệc &lt; 500k</button>
+          <button class="quick-chip" onclick="openChatWithPrompt('Tôi cao 1m70, nặng 65kg nên mặc size gì?')">Cao 1m70 65kg mặc size gì?</button>
+          <button class="quick-chip" onclick="openChatWithPrompt('Gợi ý set đồ streetwear đi dạo phố')">Set đồ Streetwear dạo phố</button>
+          <button class="quick-chip" onclick="openChatWithPrompt('Có váy nữ nào dưới 500 nghìn không?')">Váy nữ &lt; 500k</button>
+          <button class="quick-chip" onclick="openChatWithPrompt('Màu đen có hợp với quần jean xanh không?')">Màu đen + Jean xanh</button>
+        </div>
+
+        <div class="chat-input-box">
+          <textarea id="chat-textarea" class="chat-textarea" placeholder="Nhập câu hỏi: 'tìm áo sơ mi trắng công sở', 'phối đồ đi tiệc cưới', 'tư vấn size'..." rows="1"></textarea>
+          <div class="chat-input-tools">
+            <button class="tool-icon-btn" title="Máy tính đo size" onclick="openSizeAdvisorModal()">📏</button>
+            <button class="tool-icon-btn" title="Gợi ý set đồ phối" onclick="openOutfitAdvisorModal()">👗</button>
+            <button class="btn-send-message" id="btn-send" onclick="handleSendMessage()" aria-label="Gửi tin nhắn">
+              ➤
+            </button>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <!-- 3. RIGHT PANEL: LIVE WARDROBE & CATALOG -->
+    <aside class="wardrobe-panel collapsed" id="wardrobe-panel">
+      <div class="wardrobe-header">
+        <div class="wardrobe-tabs">
+          <button class="wardrobe-tab-btn active" id="tab-btn-recommended" onclick="switchWardrobeTab('recommended')">Gợi Ý Mới</button>
+          <button class="wardrobe-tab-btn" id="tab-btn-catalog" onclick="switchWardrobeTab('catalog')">Cửa Hàng</button>
+        </div>
+        <button class="modal-close-btn" onclick="toggleWardrobePanel()" style="width: 28px; height: 28px;">✕</button>
+      </div>
+
+      <!-- Wardrobe Items Content -->
+      <div class="wardrobe-content" id="wardrobe-content">
+        <div style="text-align: center; color: #94a3b8; padding: 40px 10px; font-size: 13px;">
+          Trò chuyện cùng AI Stylist để các món đồ đề xuất tự động xuất hiện tại đây!
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL: SIZE ADVISOR -->
+  <div class="modal-overlay" id="modal-size-advisor">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><span>📏</span> Máy Tính Đo Size Vóc Dáng (BMI)</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-size-advisor')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group-stylist">
+          <label>Giới tính:</label>
+          <select id="modal-size-gender">
+            <option value="Nam">Nam Giới</option>
+            <option value="Nữ">Nữ Giới</option>
+          </select>
+        </div>
+        <div class="form-group-stylist">
+          <label>Chiều cao (cm):</label>
+          <input type="number" id="modal-size-height" value="170" placeholder="Ví dụ: 170">
+        </div>
+        <div class="form-group-stylist">
+          <label>Cân nặng (kg):</label>
+          <input type="number" id="modal-size-weight" value="65" placeholder="Ví dụ: 65">
+        </div>
+        <div class="form-group-stylist">
+          <label>Sở thích form dáng:</label>
+          <select id="modal-size-fit">
+            <option value="vừa vặn">Vừa vặn tiêu chuẩn (Regular)</option>
+            <option value="ôm sát">Ôm sát tôn dáng (Slim-fit)</option>
+            <option value="rộng rãi">Thoải mái / Rộng (Oversize)</option>
+          </select>
+        </div>
+        <button class="btn-submit-modal" onclick="submitModalSizeAdvisor()">
+          ⚡ Tính Size & Đề Xuất Đồ Ngay
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OUTFIT ADVISOR -->
+  <div class="modal-overlay" id="modal-outfit-advisor">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><span>👗</span> Gợi Ý Phối Đồ Nguyên Set (Outfit)</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-outfit-advisor')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group-stylist">
+          <label>Đối tượng:</label>
+          <select id="modal-outfit-gender">
+            <option value="Nam">Nam Giới</option>
+            <option value="Nữ">Nữ Giới</option>
+          </select>
+        </div>
+        <div class="form-group-stylist">
+          <label>Dịp sử dụng trang phục:</label>
+          <select id="modal-outfit-occasion">
+            <option value="Dự tiệc">Dự tiệc cưới / Gala Dinner</option>
+            <option value="Đi làm">Đi làm công sở / Gặp khách hàng</option>
+            <option value="Dạo phố">Dạo phố / Cà phê cuối tuần</option>
+            <option value="Hẹn hò">Hẹn hò lãng mạn</option>
+            <option value="Du lịch">Du lịch / Đi chơi</option>
+          </select>
+        </div>
+        <div class="form-group-stylist">
+          <label>Phong cách định hình:</label>
+          <select id="modal-outfit-style">
+            <option value="Thanh lịch">Thanh lịch & Lịch thiệp</option>
+            <option value="Streetwear">Streetwear & Bụi bặm cá tính</option>
+            <option value="Hàn Quốc">Hàn Quốc trẻ trung</option>
+            <option value="Tối giản">Tối giản (Minimalism)</option>
+          </select>
+        </div>
+        <button class="btn-submit-modal" onclick="submitModalOutfitAdvisor()">
+          ✨ Phối Set Đồ Chuẩn Gu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: COLOR ADVISOR -->
+  <div class="modal-overlay" id="modal-color-advisor">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><span>🎨</span> Tư Vấn Quy Tắc Màu Sắc</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-color-advisor')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13.5px; color: #475569; margin-bottom: 16px; line-height: 1.6;">
+          Chọn câu hỏi phối màu bạn muốn AI Stylist giải đáp chi tiết:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="quick-chip" style="text-align: left; padding: 10px 14px;" onclick="openChatWithPrompt('Màu đen có hợp với quần jean xanh không?'); closeModal('modal-color-advisor');">
+            🎨 Màu đen có hợp với quần jean xanh không?
+          </button>
+          <button class="quick-chip" style="text-align: left; padding: 10px 14px;" onclick="openChatWithPrompt('Áo sơ mi trắng nên phối với quần màu gì đẹp nhất?'); closeModal('modal-color-advisor');">
+            👔 Áo sơ mi trắng nên phối với quần màu gì?
+          </button>
+          <button class="quick-chip" style="text-align: left; padding: 10px 14px;" onclick="openChatWithPrompt('Tone màu be và nâu cà phê phối phong cách Hàn Quốc thế nào?'); closeModal('modal-color-advisor');">
+            ☕ Tone Be và Nâu cà phê phong cách Hàn Quốc
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OPENROUTER API KEY CONFIG -->
+  <div class="modal-overlay" id="modal-config-key">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><span>🔑</span> Cấu Hình OpenRouter API Key</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-config-key')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 14px; line-height: 1.5;">
+          Hệ thống mặc định chạy <strong>Chế độ Offline AI Stylist & RAG TF-IDF</strong> cực kỳ thông minh không cần internet. 
+          Nếu bạn có API Key OpenRouter, hãy nhập vào để trải nghiệm thêm các mô hình LLM tiên tiến nhất!
+        </p>
+        <div class="form-group-stylist">
+          <label>OpenRouter API Key:</label>
+          <input type="password" id="config-api-key" placeholder="sk-or-v1-...">
+        </div>
+        <div class="form-group-stylist">
+          <label>Model Name:</label>
+          <input type="text" id="config-model-name" value="google/gemini-2.0-flash-001">
+        </div>
+        <button class="btn-submit-modal" onclick="submitConfigKeyModal()">
+          Lưu Cấu Hình
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SYSTEM INFO -->
+  <div class="modal-overlay" id="modal-system-info">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><span>ℹ️</span> Đồ Án Chatbot Tư Vấn Thời Trang</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-system-info')">✕</button>
+      </div>
+      <div class="modal-body" style="font-size: 13.5px; line-height: 1.6; color: #334155;">
+        <h4 style="margin-bottom: 6px; color: #111;">🎯 Kiến trúc hệ thống 3 lớp:</h4>
+        <ul style="padding-left: 18px; margin-bottom: 12px;">
+          <li><strong>Frontend:</strong> Giao diện Chatbot-First tối ưu trải nghiệm tương tác với trợ lý ảo thời trang.</li>
+          <li><strong>Backend:</strong> FastAPI + SQLite3 quản lý danh mục và sản phẩm.</li>
+          <li><strong>AI Engine:</strong> Hybrid AI (Bộ máy phân tích thực thể NLP + RAG Vector TF-IDF Cosine Similarity + Stylist Rule Size/Outfit + OpenRouter LLM).</li>
+        </ul>
+        <h4 style="margin-bottom: 6px; color: #111;">✨ Đầy đủ chức năng theo yêu cầu:</h4>
+        <p>Tư vấn sản phẩm, tư vấn size theo vóc dáng, tư vấn phối đồ nguyên cây, kiểm tra màu sắc và tìm kiếm theo ngữ nghĩa.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PRODUCT DETAIL -->
+  <div class="modal-overlay" id="product-detail-modal">
+    <div class="modal-box product-detail-modal-box">
+      <button class="modal-close-btn" onclick="closeModal('product-detail-modal')" style="position: absolute; top: 12px; right: 12px; z-index: 10;">✕</button>
+      <div id="modal-body-content" style="grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1fr; width: 100%;">
+        <!-- Injected by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CART DRAWER -->
+  <div class="modal-overlay" id="cart-drawer-overlay">
+    <div class="modal-box" style="max-width: 420px; height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3><span>🛒</span> Giỏ Hàng Của Bạn</h3>
+        <button class="modal-close-btn" onclick="toggleCartDrawer()">✕</button>
+      </div>
+      <div class="modal-body" id="cart-items-list" style="flex: 1; overflow-y: auto;">
+        <!-- Injected by app.js -->
+      </div>
+      <div style="padding: 18px 24px; border-top: 1px solid var(--border-color); background: #f8fafc;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 14px;">
+          <span>Tổng thanh toán:</span>
+          <strong id="cart-total-price" style="color: #b8860b; font-size: 18px;">0đ</strong>
+        </div>
+        <button class="btn-submit-modal" onclick="simulateCheckout()">Thanh Toán Đơn Hàng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/chat.js?v=2"></script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Fashion Stylist Studio - Phòng Thử Đồ & Tư Vấn Phong Cách Ảo</title>
+  <meta name="description" content="Studio tư vấn thời trang AI: Đo size theo vóc dáng, tạo set đồ hoàn chỉnh theo dịp và trò chuyện trực tiếp cùng chuyên gia ảo.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/chat.css">
+  <style>
+    .stylist-page-container {
+      max-width: 1240px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .studio-header {
+      background: radial-gradient(circle at 70% 30%, #2b2e38 0%, #101114 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    .studio-tab-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+    }
+    .studio-tab-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      color: #64748b;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .studio-tab-btn.active {
+      color: #111;
+      background: #fff8e7;
+      color: #b8972e;
+    }
+    .studio-panel {
+      display: none;
+    }
+    .studio-panel.active {
+      display: block;
+    }
+    .outfit-builder-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 30px;
+    }
+    .control-card {
+      background: white;
+      padding: 24px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+    .outfit-display-card {
+      background: white;
+      padding: 28px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+    .outfit-items-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .outfit-item-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+    .outfit-item-card:hover {
+      border-color: #d4af37;
+      box-shadow: var(--shadow-md);
+    }
+    .outfit-item-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+    .outfit-item-details {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .slider-display-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: #b8860b;
+    }
+    @media (max-width: 900px) {
+      .outfit-builder-grid {
+        grid-template-columns: 1fr;
+      }
+      .outfit-items-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="/" class="logo">
+        <div class="logo-icon">👔</div>
+        <span>FASHION<span style="color: var(--accent);">.AI</span></span>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="/" class="nav-link">Trang Chủ</a></li>
+          <li><a href="/#catalog-section" class="nav-link">Bộ Sưu Tập</a></li>
+          <li><a href="/stylist" class="nav-link active nav-stylist-btn"><span>✨ Studio AI Stylist</span></a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="cart-btn" onclick="toggleCartDrawer()" aria-label="Giỏ hàng">
+          🛒
+          <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="stylist-page-container">
+    <!-- Header Banner -->
+    <div class="studio-header">
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: #fad02c; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px;">
+          Virtual Styling Suite
+        </div>
+        <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">Studio Tư Vấn Thời Trang & Đo Dáng AI</h1>
+        <p style="color: #cbd5e1; font-size: 15px; max-width: 600px;">
+          Ứng dụng thuật toán phân tích tỷ lệ cơ thể và quy tắc phối màu chuẩn Stylist quốc tế để giúp bạn luôn nổi bật và tự tin.
+        </p>
+      </div>
+      <div style="font-size: 54px;">👗✨</div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="studio-tab-bar">
+      <button class="studio-tab-btn active" onclick="switchStudioTab('outfit', this)">
+        <span>👗</span> Gợi Ý Phối Đồ (Outfit Engine)
+      </button>
+      <button class="studio-tab-btn" onclick="switchStudioTab('size', this)">
+        <span>📏</span> Máy Tính Đo Size Vóc Dáng
+      </button>
+      <button class="studio-tab-btn" onclick="switchStudioTab('chat', this)">
+        <span>💬</span> Trò Chuyện Trực Tiếp Cùng AI Stylist
+      </button>
+    </div>
+
+    <!-- TAB 1: OUTFIT BUILDER -->
+    <div class="studio-panel active" id="panel-outfit">
+      <div class="outfit-builder-grid">
+        <div class="control-card">
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 18px;">Tùy Chỉnh Set Đồ</h3>
+          
+          <div class="form-group-stylist">
+            <label>Đối tượng:</label>
+            <select id="studio-outfit-gender">
+              <option value="Nam">Nam Giới</option>
+              <option value="Nữ">Nữ Giới</option>
+            </select>
+          </div>
+
+          <div class="form-group-stylist">
+            <label>Dịp diện trang phục:</label>
+            <select id="studio-outfit-occasion">
+              <option value="Dự tiệc">Dự tiệc cưới / Gala tối</option>
+              <option value="Đi làm">Đi làm công sở / Họp đối tác</option>
+              <option value="Dạo phố">Dạo phố / Cà phê cuối tuần</option>
+              <option value="Hẹn hò">Hẹn hò lãng mạn</option>
+            </select>
+          </div>
+
+          <div class="form-group-stylist">
+            <label>Phong cách yêu thích:</label>
+            <select id="studio-outfit-style">
+              <option value="Thanh lịch">Thanh lịch & Lịch thiệp</option>
+              <option value="Streetwear">Streetwear & Cá tính</option>
+              <option value="Hàn Quốc">Hàn Quốc Lãng tử</option>
+              <option value="Năng động">Casual & Năng động</option>
+            </select>
+          </div>
+
+          <button class="btn-checkout" onclick="generateStudioOutfit()" style="width: 100%; margin-top: 10px;">
+            ✨ Sinh Gợi Ý Phối Đồ
+          </button>
+        </div>
+
+        <div class="outfit-display-card">
+          <h2 id="studio-outfit-title" style="font-size: 20px; font-weight: 800; color: #111; margin-bottom: 8px;">
+            Bộ Phối Chuẩn Gu
+          </h2>
+          <div id="studio-outfit-tips" style="font-size: 14px; color: #475569; line-height: 1.6; white-space: pre-line; background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 3px solid #d4af37;">
+            Đang tải dữ liệu gợi ý từ AI Stylist...
+          </div>
+
+          <div class="outfit-items-row" id="studio-outfit-items">
+            <!-- Injected by JS -->
+          </div>
+
+          <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-size: 14px; color: #64748b;">Tổng giá trị cả Set:</span>
+              <strong id="studio-outfit-total" style="font-size: 22px; color: #b8860b; margin-left: 8px;">0đ</strong>
+            </div>
+            <button class="btn-ask-ai" onclick="addWholeOutfitToCart()" style="padding: 10px 20px;">
+              🛒 Thêm Cả Set Vào Giỏ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SIZE ADVISOR -->
+    <div class="studio-panel" id="panel-size">
+      <div class="outfit-builder-grid">
+        <div class="control-card">
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 18px;">Thông Số Vóc Dáng</h3>
+          
+          <div class="form-group-stylist">
+            <label>Giới tính:</label>
+            <select id="studio-size-gender">
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+            </select>
+          </div>
+
+          <div class="form-group-stylist">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <label>Chiều cao:</label>
+              <span class="slider-display-val" id="studio-height-val">170 cm</span>
+            </div>
+            <input type="range" id="studio-size-height" min="145" max="195" value="170" style="width: 100%; accent-color: var(--accent);">
+          </div>
+
+          <div class="form-group-stylist">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <label>Cân nặng:</label>
+              <span class="slider-display-val" id="studio-weight-val">65 kg</span>
+            </div>
+            <input type="range" id="studio-size-weight" min="40" max="100" value="65" style="width: 100%; accent-color: var(--accent);">
+          </div>
+
+          <div class="form-group-stylist">
+            <label>Form dáng bạn mong muốn:</label>
+            <select id="studio-size-fit">
+              <option value="vừa vặn">Vừa vặn tiêu chuẩn (Regular Fit)</option>
+              <option value="ôm sát">Ôm sát tôn dáng (Slim Fit)</option>
+              <option value="rộng rãi">Thoải mái / Rộng (Oversize)</option>
+            </select>
+          </div>
+
+          <button class="btn-checkout" onclick="calculateStudioSize()" style="width: 100%; margin-top: 10px;">
+            📏 Phân Tích & Tư Vấn Size
+          </button>
+        </div>
+
+        <div class="outfit-display-card">
+          <h2 style="font-size: 20px; font-weight: 800; color: #111; margin-bottom: 12px;">Kết Quả Tư Vấn Vóc Dáng</h2>
+          <div id="studio-size-result-text" style="font-size: 14px; line-height: 1.6; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 24px;">
+            Nhấn "Phân Tích & Tư Vấn Size" để hệ thống tính toán size chuẩn và đưa ra lời khuyên phù hợp.
+          </div>
+
+          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;">Mẫu Thiết Kế Sẵn Size Dành Riêng Cho Bạn:</h3>
+          <div class="outfit-items-row" id="studio-size-items">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: CHAT PANEL -->
+    <div class="studio-panel" id="panel-chat">
+      <div style="max-width: 800px; margin: 0 auto; background: white; border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow: hidden; height: 600px; display: flex; flex-direction: column;">
+        <div class="chat-header">
+          <div class="chat-header-info">
+            <div class="chat-avatar">👔</div>
+            <div class="chat-title-group">
+              <h4>Trò Chuyện Cùng AI Fashion Stylist</h4>
+              <div class="chat-status-text">
+                <div class="status-dot"></div>
+                <span>Hỗ trợ OpenRouter LLM & RAG Vector Search</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-messages" id="studio-chat-messages" style="flex: 1;"></div>
+        <div class="chat-quick-replies" id="studio-chat-quick-replies"></div>
+        <div class="chat-input-area">
+          <textarea id="studio-chat-input" class="chat-textarea" placeholder="Nhập câu hỏi tư vấn... (ví dụ: 'màu đen có hợp với quần jean xanh không?')"></textarea>
+          <button class="chat-send-btn" onclick="sendStudioChatMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="modal-overlay" id="product-detail-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()" aria-label="Đóng">✕</button>
+      <div id="modal-body-content" style="grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1fr; width: 100%;"></div>
+    </div>
+  </div>
+
+  <!-- CART DRAWER -->
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+      <h3 style="font-size: 18px; font-weight: 700;">🛒 Giỏ Hàng Của Bạn</h3>
+      <button class="modal-close" onclick="toggleCartDrawer()" style="position: static;">✕</button>
+    </div>
+    <div class="cart-items-list" id="cart-items-list"></div>
+    <div class="cart-footer">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 16px;">
+        <span>Tổng thanh toán:</span>
+        <strong id="cart-total-price" style="color: #b8860b; font-size: 18px;">0đ</strong>
+      </div>
+      <button class="btn-checkout" onclick="simulateCheckout()">Thanh Toán Ngay</button>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/chat.js?v=2"></script>
+  <script>
+    // Tab switching
+    function switchStudioTab(tabName, btnElem) {
+      document.querySelectorAll('.studio-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.studio-panel').forEach(p => p.classList.remove('active'));
+      btnElem.classList.add('active');
+      document.getElementById(`panel-${tabName}`).classList.add('active');
+    }
+
+    // Range sliders in Studio
+    const hSlider = document.getElementById('studio-size-height');
+    const wSlider = document.getElementById('studio-size-weight');
+    if (hSlider) {
+      hSlider.addEventListener('input', (e) => {
+        document.getElementById('studio-height-val').innerText = `${e.target.value} cm`;
+      });
+    }
+    if (wSlider) {
+      wSlider.addEventListener('input', (e) => {
+        document.getElementById('studio-weight-val').innerText = `${e.target.value} kg`;
+      });
+    }
+
+    let currentOutfitItems = [];
+
+    // Generate Studio Outfit
+    async function generateStudioOutfit() {
+      const gender = document.getElementById('studio-outfit-gender').value;
+      const occasion = document.getElementById('studio-outfit-occasion').value;
+      const style = document.getElementById('studio-outfit-style').value;
+
+      try {
+        const res = await fetch('/api/stylist/outfit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gender, occasion, style })
+        });
+        const data = await res.json();
+        currentOutfitItems = data.items || [];
+
+        document.getElementById('studio-outfit-title').innerText = data.outfit_title;
+        document.getElementById('studio-outfit-tips').innerText = data.styling_tips;
+        document.getElementById('studio-outfit-total').innerText = `${data.total_price.toLocaleString()}đ`;
+
+        const itemsContainer = document.getElementById('studio-outfit-items');
+        itemsContainer.innerHTML = currentOutfitItems.map(p => `
+          <div class="outfit-item-card">
+            <img src="${p.image}" class="outfit-item-img" alt="${p.name}">
+            <div class="outfit-item-details">
+              <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">${p.category_name}</div>
+              <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 6px; height: 38px; overflow: hidden;">${p.name}</h4>
+              <div style="font-size: 15px; font-weight: 700; color: #b8860b; margin-bottom: 10px;">${Number(p.price).toLocaleString()}đ</div>
+              <button class="btn-view-detail" onclick="viewProductDetail(${p.id})">Chi tiết món này</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        alert("Lỗi tải gợi ý phối đồ: " + err.message);
+      }
+    }
+
+    function addWholeOutfitToCart() {
+      if (currentOutfitItems.length === 0) return;
+      currentOutfitItems.forEach(p => {
+        addToCart(p.id, p.name, p.price, p.image, p.sizes[0] || 'M');
+      });
+      showToast(`Đã thêm trọn bộ ${currentOutfitItems.length} món vào giỏ hàng!`);
+      toggleCartDrawer();
+    }
+
+    // Calculate Studio Size
+    async function calculateStudioSize() {
+      const height = parseFloat(hSlider.value);
+      const weight = parseFloat(wSlider.value);
+      const gender = document.getElementById('studio-size-gender').value;
+      const fit = document.getElementById('studio-size-fit').value;
+
+      try {
+        const res = await fetch('/api/stylist/size', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            height_cm: height,
+            weight_kg: weight,
+            gender: gender,
+            fit_pref: fit
+          })
+        });
+        const data = await res.json();
+        
+        document.getElementById('studio-size-result-text').innerHTML = formatMarkdown(data.detail_message);
+        const container = document.getElementById('studio-size-items');
+        container.innerHTML = (data.recommended_products || []).map(p => `
+          <div class="outfit-item-card">
+            <img src="${p.image}" class="outfit-item-img" alt="${p.name}">
+            <div class="outfit-item-details">
+              <div style="font-size: 11px; color: #64748b;">Size chuẩn: <strong>${data.recommended_size}</strong></div>
+              <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 6px; height: 38px; overflow: hidden;">${p.name}</h4>
+              <div style="font-size: 15px; font-weight: 700; color: #b8860b; margin-bottom: 10px;">${Number(p.price).toLocaleString()}đ</div>
+              <button class="btn-checkout" onclick="addToCart(${p.id}, '${p.name}', ${p.price}, '${p.image}', '${data.recommended_size}')">
+                + Thêm Size ${data.recommended_size}
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        alert("Lỗi tính toán: " + err.message);
+      }
+    }
+
+    // Dedicated Tab Chat
+    async function sendStudioChatMessage() {
+      const input = document.getElementById('studio-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      const container = document.getElementById('studio-chat-messages');
+      const userRow = document.createElement('div');
+      userRow.className = 'chat-message-row user';
+      userRow.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div>`;
+      container.appendChild(userRow);
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: 'studio_' + chatSessionId, message: text })
+        });
+        const data = await res.json();
+        
+        let productsHtml = '';
+        if (data.recommended_products && data.recommended_products.length > 0) {
+          productsHtml = `
+            <div class="chat-product-cards">
+              ${data.recommended_products.map(p => `
+                <div class="chat-prod-card" onclick="viewProductDetail(${p.id})">
+                  <img src="${p.image}" class="chat-prod-thumb" alt="${p.name}">
+                  <div class="chat-prod-meta">
+                    <div class="chat-prod-title">${p.name}</div>
+                    <div class="chat-prod-price">${Number(p.price).toLocaleString()}đ</div>
+                    <div class="chat-prod-tag">${p.color} • ${p.style ? p.style.split(',')[0] : ''}</div>
+                  </div>
+                  <button class="chat-prod-action" onclick="event.stopPropagation(); addToCart(${p.id}, '${p.name}', ${p.price}, '${p.image}')">+ Giỏ</button>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        const aiRow = document.createElement('div');
+        aiRow.className = 'chat-message-row assistant';
+        aiRow.innerHTML = `
+          <div class="msg-avatar">✨</div>
+          <div class="msg-bubble">
+            <div>${formatMarkdown(data.reply)}</div>
+            ${productsHtml}
+          </div>
+        `;
+        container.appendChild(aiRow);
+        container.scrollTop = container.scrollHeight;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Auto load tab 1 on load
+    document.addEventListener('DOMContentLoaded', () => {
+      generateStudioOutfit();
+      calculateStudioSize();
+      // Welcome message in studio chat
+      const studioChat = document.getElementById('studio-chat-messages');
+      if (studioChat) {
+        studioChat.innerHTML = `
+          <div class="chat-message-row assistant">
+            <div class="msg-avatar">✨</div>
+            <div class="msg-bubble">
+              👋 Chào bạn đến với Studio Thời Trang! Bạn có thể đặt câu hỏi hoặc nhờ mình phối đồ theo bất kỳ sự kiện nào nhé.
+            </div>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>
